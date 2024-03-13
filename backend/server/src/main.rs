@@ -1,6 +1,8 @@
 use std::net::SocketAddr;
 
 use sea_orm::Database;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 use migration::{Migrator, MigratorTrait};
 
@@ -13,6 +15,17 @@ mod ext;
 
 #[tokio::main]
 async fn main() {
+    pid1::Pid1Settings::new()
+        .enable_log(true)
+        .launch()
+        .expect("Launch failed");
+
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::DEBUG.into())
+        .from_env_lossy();
+
+    tracing_subscriber::fmt().with_env_filter(filter).init();
+    
     let database = Database::connect(*env::DATABASE_URL)
         .await
         .expect("Failed to connect to database");
