@@ -4,7 +4,7 @@ use axum::response::IntoResponse;
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use uuid::Uuid;
 
-use entity::sea_orm_active_enums::GameResult;
+use entity::sea_orm_active_enums::{GameResult, Role};
 use service::{GameService, ImageService};
 
 use crate::configuration::app::AppState;
@@ -42,6 +42,7 @@ async fn create_game(
                 payload.rank_adjustment,
                 payload.replay_id,
                 payload.won,
+                payload.role,
             )
             .await?;
             let image = ImageService::add_image(txn, payload.stats_url, game.id).await?;
@@ -95,6 +96,7 @@ struct CreateGamePayload {
     #[garde(length(min = 1, max = 2000))]
     note: Option<String>,
     won: GameResult,
+    role: Role,
     #[garde(range(min = -100, max = 100))]
     rank_adjustment: i16,
     #[garde(length(min = 5, max = 6))]

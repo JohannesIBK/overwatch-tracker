@@ -1,4 +1,4 @@
-use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, InsertResult, QueryFilter, Set};
+use sea_orm::{ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, Set};
 use sea_orm::sea_query::OnConflict;
 
 use entity::user;

@@ -2,6 +2,7 @@ use sea_orm::prelude::Uuid;
 use sea_orm::{ActiveModelTrait, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set};
 
 use entity::game::{self, Entity as Game};
+use entity::sea_orm_active_enums::Role;
 
 pub struct GameService;
 
@@ -30,6 +31,7 @@ impl GameService {
         rank_adjustment: i16,
         replay_id: Option<String>,
         result: entity::sea_orm_active_enums::GameResult,
+        role: Role,
     ) -> Result<game::Model, DbErr> {
         let game = game::ActiveModel {
             user_id: Set(user_id),
@@ -37,6 +39,7 @@ impl GameService {
             rank_adjustment: Set(rank_adjustment),
             replay_id: Set(replay_id),
             result: Set(result),
+            role: Set(role),
             ..Default::default()
         };
 

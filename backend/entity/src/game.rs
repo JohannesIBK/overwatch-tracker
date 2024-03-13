@@ -2,18 +2,19 @@
 
 use sea_orm::entity::prelude::*;
 
-use super::sea_orm_active_enums::GameResult;
+use super::sea_orm_active_enums::{GameResult, Role};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, serde::Serialize)]
 #[sea_orm(table_name = "game")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+    #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub user_id: Uuid,
     pub note: Option<String>,
     pub rank_adjustment: i16,
     pub replay_id: Option<String>,
     pub result: GameResult,
+    pub role: Role,
     pub played_at: DateTime,
 }
 

@@ -13,3 +13,16 @@ pub enum GameResult {
     #[sea_orm(string_value = "won")]
     Won,
 }
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, serde::Serialize, serde::Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "role")]
+#[serde(rename_all = "snake_case")]
+pub enum Role {
+    #[sea_orm(string_value = "damage")]
+    Damage,
+    #[sea_orm(string_value = "open_queue")]
+    OpenQueue,
+    #[sea_orm(string_value = "support")]
+    Support,
+    #[sea_orm(string_value = "tank")]
+    Tank,
+}

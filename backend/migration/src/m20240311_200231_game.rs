@@ -20,6 +20,15 @@ impl MigrationTrait for Migration {
             .await?;
 
         manager
+            .create_type(
+                Type::create()
+                    .as_enum(Role::Table)
+                    .values(Role::iter().skip(1))
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
             .create_table(
                 Table::create()
                     .table(Game::Table)
@@ -28,14 +37,14 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(Game::Id)
                             .uuid()
                             .not_null()
-                            .auto_increment()
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Game::UserId).uuid().not_null())
                     .col(ColumnDef::new(Game::Note).string_len(2048))
                     .col(ColumnDef::new(Game::RankAdjustment).small_integer().not_null())
-                    .col(ColumnDef::new(Game::ReplayId).string_len(8))
-                    .col(ColumnDef::new(Game::Result).custom(GameResult::Table))
+                    .col(ColumnDef::new(Game::ReplayId).string_len(6))
+                    .col(ColumnDef::new(Game::Result).custom(GameResult::Table).not_null())
+                    .col(ColumnDef::new(Game::Role).custom(Role::Table).not_null())
                     .col(
                         ColumnDef::new(Game::PlayedAt)
                             .timestamp()
@@ -72,6 +81,7 @@ pub enum Game {
     RankAdjustment,
     Result,
     ReplayId,
+    Role,
     Note,
     PlayedAt,
 }
@@ -82,4 +92,13 @@ enum GameResult {
     Won,
     Lost,
     Draw,
+}
+
+#[derive(Iden, EnumIter)]
+enum Role {
+    Table,
+    Support,
+    Tank,
+    Damage,
+    OpenQueue,
 }
