@@ -8,10 +8,11 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.7.4", features = ["tokio", "http1", "json", "matched-path", "query"], default-features = false }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
+tower-http = { version = "0.5.0", features = ["cors"] }
+tower-sessions = "0.11"
 
 sea-orm = { workspace = true }
 garde = { version = "0.18.0", features = ["derive"] }
-tower-sessions = "0.11"
 async-trait = "0.1"
 
 serde = { workspace = true }

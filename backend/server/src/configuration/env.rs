@@ -12,3 +12,4 @@ macro_rules! get_env {
 
 
 get_env!(DATABASE_URL);
+get_env!(FRONTEND_URL);
