@@ -3,8 +3,6 @@ services:
     build: ./frontend
     ports:
       - "4200:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=https://fuck-ow.plyoox.net/api
   backend:
     build: ./backend
     ports:

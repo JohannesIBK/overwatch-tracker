@@ -21,6 +21,7 @@ COPY . .
 RUN ls
 
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_PUBLIC_API_URL https://fuck-ow.plyoox.net/api
 
 RUN yarn build
 
