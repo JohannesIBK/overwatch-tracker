@@ -1,10 +1,9 @@
 use axum::{
-    http::request::Parts,
     extract::FromRequestParts,
+    http::request::Parts,
     http::StatusCode
 };
-use sea_orm::prelude::async_trait;
-use tower_sessions::Session;
+use tower_sessions::{Expiry, MemoryStore, Session, SessionManagerLayer, cookie::time::Duration};
 use uuid::Uuid;
 
 use crate::configuration::Error;
@@ -39,4 +38,12 @@ where
             })
         }
     }
+}
+
+pub fn load_session() -> SessionManagerLayer<MemoryStore> {
+    let session_store = MemoryStore::default();
+
+    SessionManagerLayer::new(session_store)
+        .with_secure(false)
+        .with_expiry(Expiry::OnInactivity(Duration::days(7)))
 }

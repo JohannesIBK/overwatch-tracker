@@ -1,24 +1,27 @@
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use sea_orm::{DatabaseConnection, TransactionTrait};
+use sea_orm::{DatabaseConnection, Set, TransactionTrait};
 use uuid::Uuid;
 
+use entity::game;
 use entity::sea_orm_active_enums::{GameResult, Role};
 use service::{GameService, ImageService};
+use service::models::GameWithImages;
 
 use crate::configuration::app::AppState;
 use crate::configuration::session::SessionUser;
 use crate::configuration::Error;
+use crate::ext::axum_ext::ValidatedJson;
 
 pub fn init_routes() -> axum::Router<AppState> {
     axum::Router::new()
         .route("/", axum::routing::put(create_game))
         .route("/:id", axum::routing::delete(delete_game))
-        .route("/user/:id", axum::routing::get(get_game))
+        .route("/user/:id", axum::routing::get(get_games))
 }
 
-async fn get_game(
+async fn get_games(
     State(db): State<DatabaseConnection>,
     Path(id): Path<Uuid>,
     Query(query): Query<GetGameQuery>,
@@ -31,29 +34,39 @@ async fn get_game(
 async fn create_game(
     State(db): State<DatabaseConnection>,
     user: SessionUser,
-    axum::Json(payload): axum::Json<CreateGamePayload>,
+    ValidatedJson(payload): ValidatedJson<CreateGamePayload>,
 ) -> Result<impl IntoResponse, Error> {
-    let result = db.transaction(|txn| {
-        Box::pin(async move {
-            let game = GameService::create_game(
-                txn,
-                user.id,
-                payload.note,
-                payload.rank_adjustment,
-                payload.replay_id,
-                payload.won,
-                payload.role,
-            )
-            .await?;
-            let image = ImageService::add_image(txn, payload.stats_url, game.id).await?;
+    let result = db
+        .transaction(|txn| {
+            Box::pin(async move {
+                let game_model = game::ActiveModel {
+                    user_id: Set(user.id),
+                    id: Set(Uuid::new_v4()),
+                    note: Set(payload.note),
+                    rank_adjustment: Set(payload.rank_adjustment),
+                    replay_id: Set(payload.replay_id),
+                    result: Set(payload.result),
+                    role: Set(payload.role),
+                    ..Default::default()
+                };
 
-            Ok((game, image))
+                let game = GameService::create_game(txn, game_model).await?;
+                let image = ImageService::add_image(txn, payload.stats_url, game.id).await?;
+
+                Ok((game, image))
+            })
         })
-    })
-    .await?;
+        .await?;
 
-    let response = GameResponse {
-        game: result.0,
+    let response = GameWithImages {
+        id: result.0.id,
+        user_id: result.0.user_id,
+        note: result.0.note,
+        rank_adjustment: result.0.rank_adjustment,
+        replay_id: result.0.replay_id,
+        result: result.0.result,
+        role: result.0.role,
+        played_at: result.0.played_at,
         images: vec![result.1],
     };
 
@@ -95,11 +108,11 @@ struct GetGameQuery {
 struct CreateGamePayload {
     #[garde(length(min = 1, max = 2000))]
     note: Option<String>,
-    won: GameResult,
+    result: GameResult,
     role: Role,
     #[garde(range(min = -100, max = 100))]
     rank_adjustment: i16,
-    #[garde(length(min = 5, max = 6))]
+    #[garde(length(min = 6, max = 6))]
     replay_id: Option<String>,
     stats_url: String,
 }

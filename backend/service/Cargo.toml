@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 sea-orm = { workspace = true }
+serde = { workspace = true }
 
 entity = { path = "../entity" }

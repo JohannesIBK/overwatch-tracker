@@ -8,10 +8,10 @@ use sea_orm::entity::prelude::*;
 pub enum GameResult {
     #[sea_orm(string_value = "draw")]
     Draw,
-    #[sea_orm(string_value = "lost")]
-    Lost,
-    #[sea_orm(string_value = "won")]
-    Won,
+    #[sea_orm(string_value = "lose")]
+    Lose,
+    #[sea_orm(string_value = "win")]
+    Win,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, serde::Serialize, serde::Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "role")]

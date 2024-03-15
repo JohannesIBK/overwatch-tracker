@@ -21,8 +21,9 @@ async fn register(
     ValidatedJson(payload): ValidatedJson<RegisterPayload>,
 ) -> Result<impl IntoResponse, Error> {
     let password = utils::hash_password(payload.password).await?;
+    let id = uuid::Uuid::new_v4();
 
-    let result = UserService::create_user(&db, payload.username.to_lowercase(), password).await?;
+    let result = UserService::create_user(&db, id, payload.username.to_lowercase(), password).await?;
 
     if result == 0 {
         Err(Error::Small {

@@ -2,6 +2,7 @@ use axum::body::Body;
 use axum::http::{Response, StatusCode};
 use axum::Json;
 use axum::response::IntoResponse;
+use chrono::Utc;
 
 #[derive(Debug)]
 pub enum Error {
@@ -23,19 +24,19 @@ impl IntoResponse for Error {
             Error::Internal => ErrorResponse {
                 status: StatusCode::INTERNAL_SERVER_ERROR,
                 error: "Internal Server Error",
-                timestamp: chrono::Utc::now().naive_utc(),
+                timestamp: chrono::Utc::now(),
                 data: None,
             },
             Error::Small { status, error } => ErrorResponse {
                 status,
                 error,
-                timestamp: chrono::Utc::now().naive_utc(),
+                timestamp: chrono::Utc::now(),
                 data: None,
             },
             Error::Full { status, error, data } => ErrorResponse {
                 status,
                 error,
-                timestamp: chrono::Utc::now().naive_utc(),
+                timestamp: chrono::Utc::now(),
                 data: Some(data),
             },
         };
@@ -46,6 +47,8 @@ impl IntoResponse for Error {
 
 impl From<sea_orm::DbErr> for Error {
     fn from(err: sea_orm::DbErr) -> Self {
+        tracing::error!(target: "database", "Database error: {:?}", err);
+
         Self::Full {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             error: "Database error",
@@ -56,6 +59,8 @@ impl From<sea_orm::DbErr> for Error {
 
 impl From<sea_orm::TransactionError<sea_orm::DbErr>> for Error {
     fn from(err: sea_orm::TransactionError<sea_orm::DbErr>) -> Self {
+        tracing::error!(target: "database", "Transaction error: {:?}", err);
+
         Self::Full {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             error: "Database error",
@@ -80,6 +85,7 @@ struct ErrorResponse {
     #[serde(serialize_with = "crate::ext::serde_ext::status_code")]
     status: StatusCode,
     error: &'static str,
-    timestamp: chrono::NaiveDateTime,
+    timestamp: chrono::DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     data: Option<serde_json::Value>,
 }

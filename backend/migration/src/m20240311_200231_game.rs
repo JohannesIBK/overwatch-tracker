@@ -89,8 +89,8 @@ pub enum Game {
 #[derive(Iden, EnumIter)]
 enum GameResult {
     Table,
-    Won,
-    Lost,
+    Win,
+    Lose,
     Draw,
 }
 

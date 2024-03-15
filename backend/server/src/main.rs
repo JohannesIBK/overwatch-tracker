@@ -37,6 +37,7 @@ async fn main() {
     let app = axum::Router::new()
         .nest("/api/game", api::init_game_routes())
         .nest("/api/user", api::init_user_routes())
+        .layer(configuration::session::load_session())
         .layer(configuration::get_cors_layer())
         .with_state(AppState { db: database });
 
