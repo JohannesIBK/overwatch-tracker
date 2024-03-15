@@ -11,6 +11,7 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/overwatch
+      - FRONTEND_URL=https://fuck-ow.plyoox.net
       - PORT=3000
   db:
     image: postgres:alpine
