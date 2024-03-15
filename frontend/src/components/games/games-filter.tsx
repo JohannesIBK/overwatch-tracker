@@ -20,7 +20,7 @@ function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: G
 
             setTime(parsed === 0 ? null : parsed);
 
-            const filteredGames = filterGames([...games], { days: time, role: value });
+            const filteredGames = filterGames([...games], { days: parsed, role: value });
             setGames(filteredGames);
           }}>
           <Group my={10}>
@@ -36,7 +36,7 @@ function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: G
           onChange={(val) => {
             setValue(val as string);
 
-            const filteredGames = filterGames([...games], { days: time, role: value });
+            const filteredGames = filterGames([...games], { days: time, role: val as string });
             setGames(filteredGames);
           }}>
           <Group my={10}>
@@ -65,6 +65,8 @@ function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: G
 export default GamesFilter;
 
 function filterGames(games: Game[], filter: { days: number | null; role: string }) {
+  console.log(games.length);
+
   const { days, role } = filter;
 
   if (days) {
