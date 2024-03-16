@@ -27,11 +27,12 @@ function GamesList() {
       .toString();
   }, [games]);
 
+  // Only set on first time
   useEffect(() => {
-    if (data) {
+    if (data && games.length === 0) {
       setGames(data);
     }
-  }, [data]);
+  }, [games, data]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {JSON.stringify(error)}</div>;
