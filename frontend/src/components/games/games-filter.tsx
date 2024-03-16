@@ -6,7 +6,7 @@ import { Role } from "@/utils/game";
 
 function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: Game[] }) {
   const [value, setValue] = useState<string>("all");
-  const [time, setTime] = useState<number | null>(0);
+  const [time, setTime] = useState<number | null>(null);
 
   return (
     <Box>
@@ -14,20 +14,21 @@ function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: G
 
       <Stack>
         <ChipGroup
-          value={time?.toString() || "0"}
+          value={JSON.stringify(time)}
           onChange={(val) => {
-            let parsed = parseInt(val as string);
+            let parsed: number | null = parseInt(val as string);
+            parsed = isNaN(parsed) ? null : parsed;
 
-            setTime(parsed === 0 ? null : parsed);
+            setTime(parsed);
 
             const filteredGames = filterGames([...games], { days: parsed, role: value });
             setGames(filteredGames);
           }}>
           <Group my={10}>
-            <Chip value={"0"}>All</Chip>
-            <Chip value={"1"}>1d</Chip>
-            <Chip value={"7"}>7d</Chip>
-            <Chip value={"30"}>30d</Chip>
+            <Chip value={"null"}>All</Chip>
+            <Chip value={"0"}>Today</Chip>
+            <Chip value={"6"}>7d</Chip>
+            <Chip value={"29"}>30d</Chip>
           </Group>
         </ChipGroup>
 
@@ -65,12 +66,14 @@ function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: G
 export default GamesFilter;
 
 function filterGames(games: Game[], filter: { days: number | null; role: string }) {
-  console.log(games.length);
-
   const { days, role } = filter;
 
-  if (days) {
+  if (days != null) {
     const date = new Date();
+    date.setSeconds(0);
+    date.setMinutes(0);
+    date.setHours(0);
+
     date.setDate(date.getDate() - days);
 
     games = games.filter((game) => game.played_at > date);
