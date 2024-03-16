@@ -1,12 +1,19 @@
 import { Game } from "@/types/games";
 import { UseState } from "@/types/react";
 import { Box, Chip, ChipGroup, Group, Stack, Title } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Role } from "@/utils/game";
 
 function GamesFilter({ setGames, games }: { setGames: UseState<Game[]>; games: Game[] }) {
   const [value, setValue] = useState<string>("all");
   const [time, setTime] = useState<number | null>(null);
+
+  // Update games when the current games changed
+  // (e.g., game added)
+  useEffect(() => {
+    setGames(filterGames([...games], { days: time, role: value }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [games]);
 
   return (
     <Box>
