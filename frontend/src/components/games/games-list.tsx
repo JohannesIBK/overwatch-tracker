@@ -32,7 +32,9 @@ function GamesList() {
     if (data && games.length === 0) {
       setGames(data);
     }
-  }, [games, data]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {JSON.stringify(error)}</div>;
