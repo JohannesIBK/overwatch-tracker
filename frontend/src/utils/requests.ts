@@ -2,8 +2,8 @@ import axios from "axios";
 import { API_URL } from "@/environment";
 import { CreateGamePayload, Game } from "@/types/games";
 
-export async function fetchGames(id: string) {
-  const response = await axios.get<Game[]>(`${API_URL}/game/user/${id}`, { withCredentials: true });
+export async function fetchGames(id: string, page: number = 0) {
+  const response = await axios.get<Game[]>(`${API_URL}/game/user/${id}?page=${page}`, { withCredentials: true });
 
   return response.data.map((game) => ({
     ...game,

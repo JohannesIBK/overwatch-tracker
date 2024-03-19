@@ -1,15 +1,16 @@
 import { useGames } from "@/utils/hooks";
-import { Accordion, Badge, Box, Group, Title } from "@mantine/core";
+import { Accordion, Badge, Box, Group, ScrollArea, Title } from "@mantine/core";
 import Game from "@/components/games/game";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GameResult } from "@/utils/game";
 import type { Game as GamesType } from "@/types/games";
 import GamesFilter from "@/components/games/games-filter";
 
 function GamesList() {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [games, setGames] = useState<GamesType[]>([]);
 
-  const { error, isLoading, data } = useGames();
+  const { error, isLoading, data, fetchNextPage } = useGames();
 
   const winRate = useMemo(() => {
     if (!games.length) return "0.0%";
@@ -27,36 +28,51 @@ function GamesList() {
       .toString();
   }, [games]);
 
+  const apiGames = useMemo(() => {
+    return data?.pages.flat() || [];
+  }, [data]);
+
   // Only set on first time
   useEffect(() => {
-    if (data && games.length === 0) {
-      setGames(data);
+    if (apiGames && games.length === 0) {
+      setGames(apiGames);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [apiGames]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {JSON.stringify(error)}</div>;
 
   return (
-    <Box mt={"md"} mb={"100vh"}>
-      <GamesFilter setGames={setGames} games={data!} />
+    <Box mt={"md"}>
+      <GamesFilter setGames={setGames} games={apiGames!} />
 
       <Box>
         <Title order={5}>Games</Title>
-        <Group mb={10}>
+        <Group>
           <Badge>Win-Rate: {winRate}</Badge>
           <Badge>Games: {games.length}</Badge>
           <Badge>SR: {sr}</Badge>
         </Group>
       </Box>
 
-      <Accordion>
-        {games.map((game) => (
-          <Game key={game.id} game={game} />
-        ))}
-      </Accordion>
+      <ScrollArea.Autosize
+        mah={"65dvh"}
+        onScrollPositionChange={(pos) => {
+          if (pos.y === scrollRef.current!.scrollHeight - scrollRef.current!.clientHeight) {
+            fetchNextPage().then(() => {
+              console.log("Fetched next page");
+            });
+          }
+        }}
+        viewportRef={scrollRef}>
+        <Accordion>
+          {games.map((game) => (
+            <Game key={game.id} game={game} />
+          ))}
+        </Accordion>
+      </ScrollArea.Autosize>
     </Box>
   );
 }

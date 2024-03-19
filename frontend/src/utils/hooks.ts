@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { UserStoreContext } from "@/store/store";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { createGame, fetchGames } from "@/utils/requests";
 import { CreateGamePayload, Game } from "@/types/games";
@@ -20,7 +20,16 @@ export function useUserStore() {
 export function useGames() {
   const id = useCurrentUser();
 
-  return useQuery({ queryKey: ["games", id], queryFn: () => fetchGames(id) });
+  return useInfiniteQuery({
+    queryKey: ["games", id],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => fetchGames(id, pageParam),
+    getNextPageParam: (page, _, currentIndex) => {
+      if (page.length < 50) return undefined;
+
+      return currentIndex + 1;
+    },
+  });
 }
 
 export function useNewGame() {
