@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { UserStoreContext } from "@/store/store";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { createGame, fetchGames } from "@/utils/requests";
 import { CreateGamePayload, Game } from "@/types/games";
@@ -39,10 +39,13 @@ export function useNewGame() {
   return useMutation({
     mutationFn: (payload: CreateGamePayload) => createGame(payload),
     onSuccess: (data) => {
-      queryClient.setQueryData<Game[]>(["games", id], (oldData) => {
-        if (!oldData) return [];
+      queryClient.setQueryData<InfiniteData<Game[]>>(["games", id], (oldData) => {
+        if (!oldData) return oldData;
 
-        return [data, ...oldData];
+        const firstPage = oldData.pages.at(0) || [];
+        const newPage = [data, ...firstPage];
+
+        return { ...oldData, pages: [newPage, ...oldData.pages.slice(1)] };
       });
     },
   });
